@@ -137,8 +137,9 @@ gift <$ putStrLn "HERE'S YOUR GIFT, BOY. HO! HO! HO!"
 You can also combine it with `do-notation` thus avoiding the `pure`/`return` in the ond of it:
 
 ```haskell
-prepareReindeer :: IO ReindeerStatus
-prepareReindeer = RendeerReady <$ do
+-- | Gets reindeer ready for action.
+initReindeer :: IO ReindeerStatus
+initReindeer = RendeerReady <$ do
   putStrLn "Attach the sledges"
   putStrLn "Turn the bells on"
   putStrLn "Open the stable doors"
