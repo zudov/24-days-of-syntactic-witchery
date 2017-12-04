@@ -108,7 +108,7 @@ It can be easily defined in terms of `<$>` (aka `fmap`):
 a <$ fb = const a <$> fb
 ```
 
-And used for all of your favourite functors.
+And used for all of your favourite functors:
 
 ```haskell
 λ> 42 <$ [1, 2, 3]
