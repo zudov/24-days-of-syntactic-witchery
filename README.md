@@ -160,9 +160,12 @@ Toggle next -> next <$ do
 Combined with `guard`, we can replicate the success of `[ a | cond ]` with no sugar:
 
 ```haskell
-requestedGift kid <$ guard (isGoodKid kid)
+-- | Returns a gift for a given kid (if they deserve it).
+giftFor :: Kid -> Maybe Gift
+giftFor kid =
+  requestedGift kid <$ guard (isGoodKid kid)
 ```
 
-Note that the above expression can return a list, `Maybe`, `IO` (throws an exception for bad kids), or any other type that implements the `Alternative`.
+Note that the above expression in the body of this function can return a list, `Maybe`, `IO` (throws an exception for bad kids), or any other type that implements the `Alternative`.
 
 One could achieve the same generality using `[ a | cond ]` and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
