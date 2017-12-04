@@ -1,7 +1,7 @@
 # 24 days of syntactic witchery
 *aligning characters for fun and profit, with Haskell and PureScript*
 
-## Day 1 — Prelude
+## Day 1 — Prelude <a name="day-1"></a>
 In this "24 days of…" I want to focus on tricks and patterns that are (at least to some extent):
 
 - expressed using a relatively simple machinery
@@ -24,7 +24,7 @@ Obviously it's a work in progress. I don't yet have a full list of things to wri
 
 Guest posts are very welcome, and don't have to be in Haskell/PureScript as long as they fit the idea.
 
-## Day 2 — `[ a | cond ]`
+## Day 2 — `[ a | cond ]` <a name="day-2"></a>
 
 This simple spell allows to conditionally construct an empty or single-element list:
 
@@ -89,7 +89,7 @@ There are many more crazy things that one can do with Haskell's list comprehensi
 
 In the next section I'll show another pattern that relies on a funky operator and allows to express the same idea in a more generic way.
 
-## Day 3 — `a <$ fb`
+## Day 3 — `a <$ fb` <a name="day-3"></a>
 
 The `<$` operator is provided by both [Haskell's][haskell <$] and [PureScript's][purescript <$] Preludes:
 
@@ -157,7 +157,7 @@ Toggle next -> next <$ do
   H.raise $ Toggled nextState
 ```
 
-Combined with `guard`, we can replicate the success of `[ a | cond ]` with no sugar:
+Combined with `guard`, we can replicate the success of [`[ a | cond ]`](#day-2) with no sugar:
 
 ```haskell
 -- | Returns a gift for a given kid (if they deserve it).
@@ -168,4 +168,4 @@ giftFor kid =
 
 Note that the above expression in the body of this function can return a list, `Maybe`, `IO` (throws an exception for bad kids), or any other type that implements the `Alternative`.
 
-One could achieve the same generality using `[ a | cond ]` and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
+One could achieve the same generality using [`[ a | cond ]`](#day-2) and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
