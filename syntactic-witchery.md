@@ -6,30 +6,27 @@ In this "24 days of…" I want to focus on tricks and patterns that are (at leas
 
 - expressed using a relatively simple machinery
 - capture some idea in a concise, but not necessarily intuitive way
-- non-obvious, but can be discovered by accident or striking of bright idea
+- non-obvious, but can be discovered by accident or when striked with a bright idea
 - neat in their own way
 - mostly ungooglable
 
-Some of these are widely used in every other codebase, others pop up occasionally in the dark corners. Some are charming, but when used inappropriately can seed confusion and havoc.
+Some of these are widely used in every other codebase, other pop up occasionally in the dark corners. Some are charming, but when used inappropriately can seed confusion and havoc.
 
-Even though the title has 'syntactic' in it, I'll steer away from talking about plain usage of syntactic sugar and GHC's syntactic extensions since they are already very well documented in [GHC User's Guide][ghc-syntactic-xtensions] and excellent [24 Days of GHC Extensions][24-days-of-ghc-extensions].
+Even though the title says "syntactic", I'll steer away from talking about plain usage of syntactic sugar and GHC's syntactic extensions since they are already very well documented in [GHC User's Guide][ghc-syntactic-extensions] and excellent [24 Days of GHC Extensions][24-days-of-ghc-extensions].
+
+Real witches do not rely on syntactic sugar, they cast thunderstorms of funny operators instead.
 
 [ghc-syntactic-extensions]: http://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#syntactic-extensions
 
 [24-days-of-ghc-extensions]: https://ocharles.org.uk/blog/pages/2014-12-01-24-days-of-ghc-extensions.html
 
-This by definition is a work in progress. I don't yet have a full list of things to write about, which means that the topics won't be ordered very meaningfully and I might start running out of good ideas by the end it'll turn into reference for `lens` package.
+Obviously it's a work in progress. I don't yet have a full list of things to write about, which means that the topics won't be ordered very meaningfully. I might start running out of good ideas soon, and would have to [pick up `lens`](https://ro-che.info/ccc/23).
 
 Guest posts are very welcome, and don't have to be in Haskell/PureScript as long as they fit the idea.
 
-[day-1]: #file-01-empty-or-singleton-list)
-
 ## Day 2 — `[ a | cond ]`
 
-This trick allows to conditionally construct an empty or single-element list,
-via [list comprehension] syntactic sugar.
-
-[list comprehension]: https://wiki.haskell.org/List_comprehension
+This simple spell allows to conditionally construct an empty or single-element list:
 
 ```haskell
 λ> [ 42 | True ]
@@ -37,6 +34,10 @@ via [list comprehension] syntactic sugar.
 λ> [ 42 | False ]
 []
 ```
+
+It uses a small subset of the [list comprehension] syntactic sugar.
+
+[list comprehension]: https://wiki.haskell.org/List_comprehension
 
 Is there any use for it? Bundled with `concat` it provides a nice way of constructing
 lists where particular elements should be included only if a set of conditions is satisfied:
@@ -82,12 +83,11 @@ main = mapM_ (putStrLn . fizzbuzz) [1..100]
         num  = [ show n | null fizz, null buzz ]
 ```
 
-As any proper spell this one might be confusing and non-obvious for someone who haven't
-encountered it before. However in cases above it gives a good structure
-and easy to grasp code pattern, which I believe justifies it.
+As any proper spell this one might be confusing and non-obvious for someone who haven't encountered it before. But when used wisely it provides a good structure and easy to grasp code-pattern which justifies it.
 
-Next we'll look at generalization of this pattern that doesn't require list comprehensions,
-but simply uses a funky operator.
+There are many more crazy things that one can do with Haskell's list comprehensions, you can read more about them [here](https://ocharles.org.uk/blog/guest-posts/2014-12-07-list-comprehensions.html). PureScript, on the other hand, choses to not have list comprehension sugar.
+
+In the next section I'll show another pattern that relies on a funky operator and allows to express the same idea in a more generic way.
 
 ## Day 3 — `a <$ fb`
 
