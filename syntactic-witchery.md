@@ -91,12 +91,10 @@ In the next section I'll show another pattern that relies on a funky operator an
 
 ## Day 3 — `a <$ fb`
 
-The `<$` operator is provided by both [Haskell's][haskell <$] and [PureScript's][purescript <$] Prelude.
+The `<$` operator is provided by both [Haskell's][haskell <$] and [PureScript's][purescript <$] Preludes:
 
 [haskell <$]: https://hackage.haskell.org/package/base-4.10.0.0/docs/Prelude.html#v:-60--36-
 [purescript <$]: https://pursuit.purescript.org/packages/purescript-prelude/3.1.0/docs/Data.Functor#v:(%3C$)
-
-This 'void right' or 'less dollars' operator, has the following signature:
 
 ```haskell
 (<$) :: Functor f => a -> f b -> f a
@@ -128,7 +126,9 @@ Computing the ultimate answer
 42
 ```
 
-My misintuition about `<$` has been something like "evaluates the stuff on the right side, throws away the result and returns the value on the left side", because it's common to use it for "return the value while logging the act of returning it":
+Until today (when I finally read the docstring) my misintuition about `<$` has been something like "evaluates the stuff on the right side, throws away the result and returns the value on the left side".
+
+It's handy for returning the value while logging the act of returning it:
 
 ```haskell
 gift <$ putStrLn "HERE'S YOUR GIFT, BOY. HO! HO! HO!"
@@ -156,8 +156,7 @@ Toggle next -> next <$ do
   H.raise $ Toggled nextState
 ```
 
-
-Combined with `guard`, we can replicate the success of `[ a | cond ]` without zero sugar:
+Combined with `guard`, we can replicate the success of `[ a | cond ]` with no sugar:
 
 ```haskell
 requestedGift kid <$ guard (isGoodKid kid)
@@ -165,4 +164,4 @@ requestedGift kid <$ guard (isGoodKid kid)
 
 Note that the above expression can return a list, `Maybe`, `IO` (throws an exception for bad kids), or any other type that implements the `Alternative`.
 
-One could achieve the same with `[ a | cond ]` by enabling `MonadComprehensions` extension, but that's for muggles.
+One could achieve the same generality using `[ a | cond ]` and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
