@@ -144,7 +144,7 @@ prepareReindeer = RendeerReady <$ do
   putStrLn "Open the stable doors"
 ```
 
-I find this particularly handy when implementing ["eval" functions with `purescript-halogen`][halogen-eval]:
+I find this particularly handy when implementing ["eval" functions for `purescript-halogen`][halogen-eval]:
 
 [halogen-eval]: https://github.com/slamdata/purescript-halogen/blob/master/docs/2%20-%20Defining%20a%20component.md#evaluating-actions
 
