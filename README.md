@@ -170,7 +170,7 @@ Note that the above expression in the body of this function can return a list, `
 
 One could achieve the same generality using [`[ a | cond ]`](#day-2) and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
 
-## Day 4 — `f <$> fa`
+## Day 4 — `f <$> fa` <a name="day-4"></a>
 
 `<$>` operator is a handy alias for our favourite `map`/`fmap` whose definition makes up a `Functor` typeclass.
 
