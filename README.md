@@ -139,7 +139,7 @@ You can also combine it with `do-notation` thus avoiding the `pure`/`return` in 
 ```haskell
 -- | Gets reindeer ready for action.
 initReindeer :: IO ReindeerStatus
-initReindeer = RendeerReady <$ do
+initReindeer = ReindeerReady <$ do
   putStrLn "Attach the sledges"
   putStrLn "Turn the bells on"
   putStrLn "Open the stable doors"
