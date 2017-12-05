@@ -169,3 +169,58 @@ giftFor kid =
 Note that the above expression in the body of this function can return a list, `Maybe`, `IO` (throws an exception for bad kids), or any other type that implements the `Alternative`.
 
 One could achieve the same generality using [`[ a | cond ]`](#day-2) and enabling `MonadComprehensions` extension, but I'll leave that to muggles.
+
+## Day 4 — `f <$> fa`
+
+`<$>` operator is a handy alias for our favourite `map`/`fmap` whose definition makes up a `Functor` typeclass.
+
+It's used a lot in Haskell and PureScript alike. It's an important stepping stone to more elaborate tricks, and a building block for many combinators.
+
+```haskell
+(<$>) :: Functor f => (a -> b) -> f a -> f b
+```
+
+Taking a function (`a -> b`) and an `f a` functor, `fmap` applies that function to every `b` inside it.
+
+"Container types" are most intuitive `Functor`s, quite literally their `fmap` applies the given function to every element that's contained in there.
+
+```haskell
+λ> (+1) <$> Just 2017
+Just 2018
+λ> fmap (gregorianMonthLength 2017) [1..12]
+[31,28,31,30,31,30,31,31,30,31,30,31]
+```
+
+It's also more-or-less intuitive to think about `IO` and other effectful actions as something that holds a value:
+
+```haskell
+λ> map Char.toUpper <$> getLine
+ho ho ho
+"HO HO HO"
+```
+
+However don't be surpised if that intuition doesn't work for some types:
+
+```haskell
+λ> ((+2000) <$> (+18)) 0
+2018
+```
+
+To learn more about functors, I recommend reading [Typeclassopedia](https://wiki.haskell.org/Typeclassopedia#Functor).
+
+As shown above, I prefer using `fmap`/`map` function when mapping over multi-element data-structures. `<$>` shines when applying functions to values in effectful contexts or things like `Maybe` or `Either`. The second case is more synonymous to function application, whereas the first actually relates to the logic of the program and I prefer to explicitly point out that I map over every element of a structure.
+
+`<$>` is quite descriptive and helpful when it's needed to wrap result of some action in a newtype before binding it to a name:
+
+```haskell
+username <- Username <$> getEnv "USERNAME"
+password <- Password <$> getEnv "PASSWORD"
+```
+
+Or extracting a part of the value:
+
+```haskell
+today <- utctDay <$> getCurrentTime
+```
+
+`<$>` will be popping up quite often in the upcoming chapters. Tomorrow we'll look at it's friend `flap`/`<@>` and then at some point we'll get to their ally `<*>` and see how they all can work together.
