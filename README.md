@@ -180,7 +180,7 @@ It's used a lot in Haskell and PureScript alike. It's an important stepping ston
 (<$>) :: Functor f => (a -> b) -> f a -> f b
 ```
 
-Taking a function (`a -> b`) and an `f a` functor, `fmap` applies that function to every `b` inside it.
+Taking a function (`a -> b`) and an `f a` functor, `fmap` applies that function to every `a` inside it.
 
 "Container types" are most intuitive `Functor`s, quite literally their `fmap` applies the given function to every element that's contained in there.
 
