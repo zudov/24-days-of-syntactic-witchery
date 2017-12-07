@@ -225,7 +225,7 @@ today <- utctDay <$> getCurrentTime
 
 `<$>` will be popping up quite often in the upcoming chapters. Tomorrow we'll look at it's friend `flap`/`<@>` and then at some point we'll get to their ally `<*>` and see how they all can work together.
 
-## Day 5 — `ff <@> a`
+## Day 5 — `ff <@> a` <a name="day-5"></a>
 
 While writing the previous posts I noticed that Purescript's `Data.Functor` module defines an interesting function called `flap`, which is also availabe via operator named `<@>`.
 
@@ -249,42 +249,10 @@ flap ff x = (\f -> f x) <$> ff
 infixl 4 <@>
 ```
 
-The dumbest thing we can do is to apply several functions to the same value:
 
-```purescript
-λ> [maximum, minimum] <@> [5,7,1,9,3,2,6]
-[9, 1]
-λ> [add 1, add 2, add 3] <@> 24
-```
+Note that `flap` generalizes a more well-known [`flip`](https://pursuit.purescript.org/packages/purescript-prelude/3.1.0/docs/Data.Function#v:flip) function.
 
-But combining it with `<$>` makes it more intersting:
-
-```haskell
-λ> add <$> [1, 2, 3] <@> 0
-[1, 2, 3]
-```
-
-```haskell
-kidsAge :: Kid -> IO Int
-kidsAge kid =
-  (-) <$> getCurrentYear <@> kidsBirthYear kid
-```
-
-```haskell
-sendGiftFor:: Kid -> IO ()
-sendGiftFor kid =
-	sequence_ (sendGift <$> giftFor <@> kidAddress kid)
-  where
-    giftFor :: Kid -> Maybe Gift
-    kidAddress :: Kid -> Address
-    sendGift :: Gift -> Address -> IO ()
-```
-
-##### On the flip side
-
-Note that, that `flap` generalizes the more well-known [`flip`](https://pursuit.purescript.org/packages/purescript-prelude/3.1.0/docs/Data.Function#v:flip) function.
-
-See, if we start with the type of `flap`.
+See, if we start with the type of `flap`:
 
 ```haskell
 f (b -> c) -> b -> f c
@@ -296,5 +264,50 @@ and substitute `a ->` for the `f`, we'll get:
 (a -> b -> c) -> b -> a -> c
 ```
 
-Which is exactly the type of `flap`.
+Which is exactly the type of `flap`. We can indeed use it as if it was `flip`:
+
+```haskell
+λ> flap (++) "foo" "bar"
+"barfoo"
+```
+
+Another simple thing we can do is applying several functions to the same value:
+
+```purescript
+λ> [maximum, minimum] <@> [5,7,1,9,3,2,6]
+[9,1]
+λ> [add 1, add 2, add 3] <@> 0
+[1,2,3]
+```
+
+But combining it with `<$>` makes it more intersting:
+
+```haskell
+λ> add <$> [1,2,3] <@> 0
+[1,2,3]
+```
+
+A neat thing is going on here. We first do `add <$> [1,2,3]` which is equivalent to `[add 1, add 2, add 3]`.
+Then we apply each of those functions to `0` using `<@>` operator.
+
+Here's a slightly more useful application of lists:
+
+```haskell
+-- | Every christmas since year 2000th.
+christmases :: [Day]
+christmases =
+  fromGregorian <$> [2000..] <@> 12 <@> 25
+```
+
+Works equally well for IO:
+
+```haskell
+thisChristmas :: IO Day
+thisChristmas =
+  fromGregorian <$> getCurrentYear <@> 12 <@> 25  
+```
+
+Using `f <$> fa <@> b <@> c` pattern we can give function `f` a value which is wrapped in a functor along with a couple more normal values. `f` can be of any arity, we'll just chain the `<@>`.
+
+However we still lack an ability to apply a function to several non-pure values. Next we'll see how it can be done with a help of `<*>`.
 
