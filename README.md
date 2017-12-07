@@ -224,3 +224,77 @@ today <- utctDay <$> getCurrentTime
 ```
 
 `<$>` will be popping up quite often in the upcoming chapters. Tomorrow we'll look at it's friend `flap`/`<@>` and then at some point we'll get to their ally `<*>` and see how they all can work together.
+
+## Day 5 — `ff <@> a`
+
+While writing the previous posts I noticed that Purescript's `Data.Functor` module defines an interesting function called `flap`, which is also availabe via operator named `<@>`.
+
+```haskell
+(<@>) :: Functor f => f (a -> b) -> a -> f b
+```
+
+Takes a function in a context of `f` and applies it to a normal value `a`.
+
+Notice that it's a lot like [`<$>` (`fmap`)](#day-4) only now first argument, the `a -> b` function is wrapped in an `f` functor, while the second argument is just a normal `a` value.
+
+Here is how it could be defined in haskell:
+
+```haskell
+flap :: Functor f => f (a -> b) -> a -> f b
+flap ff x = (\f -> f x) <$> ff
+
+(<@>) :: Functor f => f (a -> b) -> a -> f b
+(<@>) = flap
+
+infixl 4 <@>
+```
+
+The dumbest thing we can do is to apply several functions to the same value:
+
+```purescript
+λ> [maximum, minimum] <@> [5,7,1,9,3,2,6]
+[9, 1]
+λ> [add 1, add 2, add 3] <@> 24
+```
+
+But combining it with `<$>` makes it more intersting:
+
+```haskell
+λ> add <$> [1, 2, 3] <@> 0
+[1, 2, 3]
+```
+
+```haskell
+kidsAge :: Kid -> IO Int
+kidsAge kid =
+  (-) <$> getCurrentYear <@> kidsBirthYear kid
+```
+
+```haskell
+sendGiftFor:: Kid -> IO ()
+sendGiftFor kid =
+	sequence_ (sendGift <$> giftFor <@> kidAddress kid)
+  where
+    giftFor :: Kid -> Maybe Gift
+    kidAddress :: Kid -> Address
+    sendGift :: Gift -> Address -> IO ()
+```
+
+##### On the flip side
+
+Note that, that `flap` generalizes the more well-known [`flip`](https://pursuit.purescript.org/packages/purescript-prelude/3.1.0/docs/Data.Function#v:flip) function.
+
+See, if we start with the type of `flap`.
+
+```haskell
+f (b -> c) -> b -> f c
+```
+
+and substitute `a ->` for the `f`, we'll get:
+
+```haskell
+(a -> b -> c) -> b -> a -> c
+```
+
+Which is exactly the type of `flap`.
+
