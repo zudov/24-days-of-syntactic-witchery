@@ -311,3 +311,48 @@ Using `f <$> fa <@> b <@> c` pattern we can give function `f` a value which is w
 
 However we still lack an ability to apply a function to several non-pure values. Next we'll see how it can be done with a help of `<*>`.
 
+
+## Day 6 — `fa <*> fb` <a name="day-6"></a>
+
+`<*>` brings the best of `<$>` and `<@>` together:
+
+```haskell
+(<*>) :: Applicative f => f (a -> b) -> f a -> f b
+```
+
+We stepped up from `Functor` to `Applicative`, and now both the `a -> b` function and `a` value are wrapped in the context of `f`:
+
+```haskell
+λ> Just not <*> Just False
+True
+λ> Nothing <*> Just False
+False
+```
+
+Combining it with `<$>` and `<@>` allows us to lift functions with arbitrary amount of arguments while still passing some pure values in there:
+
+```haskell
+*Main> (\wish name -> wish ++ ", " ++ name) <$> ["Merry Christmas", "Happy new year"] <*> ["Foo", "Bar"]
+["Merry Christmas, Foo","Merry Christmas, Bar","Happy new year, Foo","Happy new year, Bar"]
+```
+
+```haskell
+-- | Every Friday 13th since year 2000th.
+evilFridays :: [Day]
+evilFridays =
+  filter isFriday $ fromGregorian <$> [2000..] <*> [1..12] <@> 13
+```
+
+There are many useful applications for `Applicative`. Context-free parsers and validators are among my favourite.
+
+Chaining `<$>`, `<@>`, `<*>` is cute, but it gets a bit hard to follow with complex expressions. Fortunately, both Haskell and PureScript now support `ApplicativeDo` notation.
+
+The above example could actually be rewritten as:
+
+```haskell
+evilFridays :: [Day]
+evilFridays = filter isFriday $ do
+  year   <- [2000..]
+  month  <- [1..12]
+  pure $ fromGregorian year month 13
+```
