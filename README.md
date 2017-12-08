@@ -356,3 +356,76 @@ evilFridays = filter isFriday $ do
   month  <- [1..12]
   pure $ fromGregorian year month 13
 ```
+
+## Day 7 — `fa *> fb` / `fa <* fb`
+
+Both operators `<*` and `*>` allow to combine two applicative actions in such a way that both are executed but only one is returned. `<*` returns the result of the first, `*>` the result of the second.
+
+Both can be defined in terms of `<*>`.
+
+For lists, the behaviour might seem a bit strange:
+
+```haskell
+> ["foo", "bar"] <* [1..3]
+["foo","foo","foo","bar","bar","bar"]
+```
+
+Every element of the right list is replaced with the left list and the resulting list of lists is concatenated.
+
+For `Maybe`, both branches gets evaluated and if both are `Just` the result of the one to which the arrow points is returned:
+
+```haskell
+> Just 'a' *> Just 'b'
+Just 'b'
+> Nothing *> Just "foo"
+Just "foo"
+```
+
+I find these operators most pleasant when it's applied in "stateful" applicatives, for example IO:
+
+```haskell
+λ> reply <- putStr "Were you a good kid?" *> getLine <* putStrLn "HO! HO! HO!"
+Were you a good kid?
+yes
+HO! HO! HO!
+λ> reply
+"yes"
+```
+
+or applicative regexps (via [`regex-applicative` library](https://hackage.haskell.org/package/regex-applicative):
+
+```haskell
+> "@username" =~ "@" *> many (psym isAlphaNum)
+Just "username"
+```
+
+```haskell
+> let hashtag = "#" *> many (psym isAlphaNum)
+> "#foo" =~ hashtag
+Just "foo"
+```
+
+```haskell
+> let hashtags = many (few anySym *> hashtag <* few anySym)
+> "Yo, #foo bar #baz, #quux" =~ hashtags
+Just ["foo","baz,","quux"]
+```
+
+```
+parsePrice :: String -> Maybe Double
+parsePrice =
+  match $
+    optional ("$" <* optional " ")  -- can start with dollar and optional space
+      *> (read <$> value) <*        -- has a value in the middle
+    optional (optional " " *> "$")  -- can end with dollar and optional space
+  where
+    value = do
+      dollars <- integral
+      cents   <- optional fractional
+      pure (dollars ++ maybe "" ('.' :) cents)
+
+    integral   = many digit
+    fractional = sym '.' *> replicateM 2 digit
+
+    digit  = psym Char.isDigit
+```
