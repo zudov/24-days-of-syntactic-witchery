@@ -427,5 +427,136 @@ parsePrice =
     integral   = many digit
     fractional = sym '.' *> replicateM 2 digit
 
-    digit  = psym Char.isDigit
+    digit = psym Char.isDigit
+```
+
+# Day 8 — `<>`
+
+The "append" operator, `<>` originates from `Monoid` typeclass, but a more precise place for it is `Semigroup`.
+These days you can get it from `Data.Semigroup` both in Haskell and PureScript.
+
+```purescript
+class Semigroup a where
+  (<>) :: a -> a -> a
+```
+
+`<>` combines two values of the same type. This "combine" operation can be pretty much anything as long as it's associative:
+
+```haskell
+(x <> y) <> z = x <> (y <> z)
+```
+
+Haskell's [`Data.Semigroup`](https://hackage.haskell.org/package/base-4.10.1.0/docs/Data-Semigroup.html) and [`purescript-monoid`](https://pursuit.purescript.org/packages/purescript-monoid/) defines a number of useful `Semigroup`s.
+
+##### Appending normal things
+
+The most natural usage is appending things in the common sense of most programming languages:
+
+```haskell
+> "abc" <> "def"
+"abcdef"
+> [1..3] <> [4..6]
+[1,2,3,4,5,6]
+> Set.fromList [1..4] <> Set.fromList [3..6]
+fromList [1,2,3,4,5,6]
+> Map.fromList (zip [1..4] ["a".."d"]) <> Map.fromList (zip [3..6] ["C".."G"])
+fromList [(1,'a'),(2,'b'),(3,'c'),(4,'d'),(5,'E'),(6,'F')]
+```
+
+Note that in the last case values from the first `Map` win over the values of the second `Map`.
+
+One might need to append two `Map`s while merging the values under colliding keys. This can be done via `Map.unionWith (<>)`.
+
+Our favourite fizzbuzz could be written like that:
+
+```haskell
+fizzbuzz :: Int -> String
+fizzbuzz n = concat (fizz <> buzz <> num)
+  where
+    fizz, buzz, num :: [String]
+    fizz = "Fizz" <$ guard (n `mod` 3 == 0)
+    buzz = "Buzz" <$ guard (n `mod` 5 == 0)
+    num  = show n <$ guard (null fizz && null buzz)
+```
+
+`fizz`, `buzz` and `num` are simply lists of strings that are being appended together via `<>`.
+
+##### Appending maybe things
+
+Given a `Semigroup` for `a`, we can get a free `Semigroup` for `Maybe a`:
+
+```
+class Semigroup a => Semigroup (Maybe a) where
+  Nothing <> Nothing = Nothing
+  Just a  <> Nothing = a
+  Nothing <> Just b  = b
+  Just a  <> Just b  = Just (a <> b)
+```
+
+This allows us to explicitly describe the "default" case in fizzbuzz:
+
+```haskell
+fizzbuzz :: Int -> String
+fizzbuzz n = fromMaybe (show n) (fizz <> buzz)
+  where
+    fizz, buzz :: Maybe String
+    fizz = "Fizz" <$ guard (n `mod` 3 == 0)
+    buzz = "Buzz" <$ guard (n `mod` 5 == 0)	
+```
+
+Now `fizz` and `buzz` are `Maybe String`, we append them to each other and if that is `Nothing` we just return the default `show n`.
+
+##### Appending functions
+
+For every `Semigroup` `b`, we can also get a free `Semigroup` for `a -> b`:
+
+```haskell
+class Semigroup b => Semigroup (a -> b) where
+  f <> g = \a -> f a <> g a
+```
+
+The result of appending two functions is a function that passes a value to both and appends the results.
+
+```
+-- | Combines the gifts that should be sent to a given kid.
+kidGift :: Kid -> Maybe Gift
+kidGift = goodKidGift <> candyGift
+
+-- | Good kids get requested gifts. Bad ones get nothing.
+goodKidGift :: Kid -> Maybe Gift
+goodKidGift kid =
+  requestedGift kid <$ isGoodKid kid
+
+-- | We attach some fresh candies for every kid.
+--   Bad ones get old uneatable candies and salmiaki (unless they are from Finland).
+candyGift :: Kid -> Maybe Gift
+candyGift kid =
+  (freshCandies <$ isGoodKid kid)
+    <>
+  (salmiakki <$ guard (not (isGoodKid kid) && not (fromFinland kid)))
+    <>
+  (oldCandies <$ guard (not (isGoodKid kid)))
+```
+
+
+##### Higher-order appends
+
+As show above with `Map.unionWith (<>)` it's common to pass `<>` to other higher-order functions.
+
+Some of those patterns are so common that there are shorthands for them.
+
+`fold` folds a structure and combines all elements:
+
+```haskell
+> let fold = foldl (<>) mempty
+> fold ["foo", "bar", "baz"]
+"foobarbaz"
+```
+
+`foldMap` allows to first apply a function to all of them:
+
+```haskell
+> let foldMap f = fold . map f
+> foldMap Product [1..10]
+Product {getProduct = 3628800}
 ```
