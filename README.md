@@ -314,7 +314,7 @@ However we still lack an ability to apply a function to several non-pure values.
 
 ## Day 6 — `fa <*> fb` <a name="day-6"></a>
 
-`<*>` brings the best of `<$>` and `<@>` together:
+"Apply over" operator — `<*>`, brings the best of `<$>` and `<@>` together:
 
 ```haskell
 (<*>) :: Applicative f => f (a -> b) -> f a -> f b
