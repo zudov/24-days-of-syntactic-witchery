@@ -378,7 +378,7 @@ For `Maybe`, both branches gets evaluated and if both are `Just` the result of t
 > Just 'a' *> Just 'b'
 Just 'b'
 > Nothing *> Just "foo"
-Just "foo"
+Nothing
 ```
 
 I find these operators most pleasant when it's applied in "stateful" applicatives, for example IO:
