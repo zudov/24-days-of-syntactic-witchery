@@ -392,7 +392,9 @@ HO! HO! HO!
 "yes"
 ```
 
-or applicative regexps (via [`regex-applicative` library](https://hackage.haskell.org/package/regex-applicative):
+or applicative regexps (via [`regex-applicative` library][regexp-applicative]:
+
+[regexp-applicative]: https://hackage.haskell.org/package/regex-applicative
 
 ```haskell
 > "@username" =~ "@" *> many (psym isAlphaNum)
