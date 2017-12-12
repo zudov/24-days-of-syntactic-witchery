@@ -562,3 +562,94 @@ Some of those patterns are so common that there are shorthands for them.
 > foldMap Product [1..10]
 Product {getProduct = 3628800}
 ```
+
+# Day 12 — `<|>` <a name="day-12"></a>
+
+The "alt" operator (<|>) comes from `Alternative` class. In PureScript, more precise `Alt` class is available.
+
+```
+class Alt f where
+  (<|>) :: f a -> f a -> f a
+```
+
+It's very similar to the `<>` operator, it also combines two values, only its defined for `* -> *` "container" types.
+It also has to be associative, but in addition to that it also must be distributive:
+
+```
+f <$> (x <|> y) == (f <$> x) <|> (f <$> y)
+```
+
+Applying a function to a combination of two values is the same as combining those values after applying the function to each of them.
+
+`<|>` works as append for lists/arrays:
+
+```haskell
+> ['a'..'c'] <|> ['D'..'F']
+"abcDEF"
+```
+
+That's an interesting fact, but `<|>` is seldomly used like that.
+For appending it's more common to use `<>`.
+
+`<|>` is very handy for picking one of the `Maybe` values:
+
+```haskell
+> Nothing <|> Just 'a' <|> Just 'b'
+Just 'a'
+```
+
+If you have many alternatives you might prefer to use `asum` (Haskell) or `oneOf` (PureScript):
+
+```purescript
+> asum [ Nothing, Just 'a', Just 'b' ]
+```
+
+Alt comes handy for matching alternatives of [regexps][regexp-applicative]:
+
+```haskell
+data Currency = EUR | GBP | USD
+  deriving (Show)
+
+currency :: RE Char Currency
+currency =
+  USD <$ ("$" <|> "USD")
+    <|>
+  EUR <$ ("€" <|> "EUR")
+    <|>
+  GBP <$ ("£" <|> "GBP")
+```
+
+Or even swallowing any `IOException` in a hideous way (may be good for scripts):
+
+```haskell
+> readFile "/etc/shadow" <|> pure "Ooops. Operation failed."
+"Ooops. Operation failed."
+```
+
+Or race two [async](https://hackage.haskell.org/package/async) processes:
+
+```haskell
+> runConcurrently $
+    Concurrently (threadDelay 5000 *> print 5000)
+      <|>
+    Concurrently (threadDelay 1000 *> print 1000)
+1000
+```
+
+[`purescript-aff`](https://github.com/slamdata/purescript-aff) steps in the game with examples from its README:
+
+```purescript
+example = do
+  result <- Ajax.get "http://foo.com" <|> Ajax.get "http://bar.com"
+  pure result
+```
+
+```purescript
+-- Make a request with a 3 second timeout
+example =
+  sequential $ oneOf
+    [ parallel (Just <$> Ajax.get "https://foo.com")
+    , parallel (Nothing <$ delay (Milliseconds 3000.0))
+    ]
+```
+
