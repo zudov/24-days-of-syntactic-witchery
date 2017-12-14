@@ -653,3 +653,56 @@ example =
     ]
 ```
 
+## Day 14 — `>>=` / `=<<`
+
+The `bind` operation has two directional operators, `>>=` and `=<<`. This operators are so common that one of them became a part of Haskell logo.
+
+As usually, I give a couple of examples that use some of our favourite monads:
+
+Lists are concatenated like via `concatMap`:
+
+```haskell
+λ> show =<< [1..10]
+"12345678910"
+```
+
+For `Maybe` the `Just` values are threaded through, short-circuting on `Nothing`:
+
+```haskell
+λ> Just "foobarbaz" >>= Text.stripPrefix "foo" >>= Text.stripSuffix "baz"
+Just "bar"
+```
+
+Nested property access in json data:
+
+```purescript
+(.?) :: forall a. DecodeJson a => JObject -> String -> Either String a
+```
+
+```purescript
+object .? "foo" >>= \foo -> foo .? "bar" >>= \bar -> bar .? "baz"
+```
+
+Though in this case it's much more readable to use do-sugar:
+
+```purescript
+do foo <- object .? "foo"
+   bar <- foo .? "bar"
+   bar .? "baz"
+```
+
+
+You can use destructuring functions like `maybe` or `either` to conviniently match
+in the binding function.
+
+```haskell
+requestLaunchPermit >>= maybe abortLaunch (\permit -> igniteEngine (enginePermit permit))
+```
+
+Though using `case` syntax (perhaps via `LambdaCase`) is not bad and sometimes better as well:
+
+```haskell
+requestLaunchPermit >>= \case
+  Nothing -> abortLaunch
+  Just permit -> igniteEngine (enginePermit permit)
+```
