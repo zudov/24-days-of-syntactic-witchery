@@ -324,9 +324,9 @@ We stepped up from `Functor` to `Applicative`, and now both the `a -> b` functio
 
 ```haskell
 λ> Just not <*> Just False
-True
+Just True
 λ> Nothing <*> Just False
-False
+Nothing
 ```
 
 Combining it with `<$>` and `<@>` allows us to lift functions with arbitrary amount of arguments while still passing some pure values in there:
